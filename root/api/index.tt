@@ -1,0 +1,3 @@
+[% USE Handy;
+   c.model('API').about(c.request).as_json;
+%]
