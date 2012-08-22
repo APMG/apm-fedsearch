@@ -3,14 +3,19 @@ use strict;
 use warnings;
 use Carp;
 use Data::Dump qw( dump );
-use LWP::UserAgent;
 use Parallel::Iterator qw( iterate_as_array );
 use JSON;
-use WWW::OpenSearch::Response;
+use LWP::UserAgent;
+
+# we do not use WWW::OpenSearch because it does more than we need
+# but we do use XML::Feed to parse XML responses
+use XML::Simple;
+use XML::Feed;
 
 sub new {
     my $class = shift;
     my %args  = @_;
+    $args{fields} ||= [qw( title id author link summary tags modified )];
     return bless \%args, $class;
 }
 
@@ -30,19 +35,51 @@ sub search {
 
 }
 
+sub fields {
+    return shift->{fields};
+}
+
 sub _aggregate {
     my $self      = shift;
     my $responses = shift;
     my $results   = [];
+    my $fields    = $self->fields;
+
     for my $resp (@$responses) {
+
+        #warn sprintf( "response for %s\n", $resp->request->uri );
         if ( $resp->content_type eq 'application/json' ) {
             my $r = decode_json( $resp->content );
             push @$results, @{ $r->{results} };
         }
         if ( $resp->content_type eq 'application/xml' ) {
-            warn $resp->content;
-            my $wos = WWW::OpenSearch::Response->new($resp);
-            dump $wos;
+            my $xml = $resp->content;
+
+            #warn $xml;
+            my $feed = XML::Feed->parse( \$xml );
+
+            #dump $feed;
+            my @entries;
+            for my $item ( $feed->entries ) {
+                my $e = {};
+                for my $f (@$fields) {
+                    $e->{$f} = $item->$f;
+                }
+                my $content = $item->content;
+                my $fields  = XMLin( $content->body );
+
+                #dump $fields;
+                for my $f ( keys %$fields ) {
+                    $e->{$f} = $fields->{$f};
+                }
+
+                #dump $content;
+                #dump $e;
+                push @entries, $e;
+
+            }
+
+            push @$results, @entries;
         }
     }
     return [ sort { $b->{score} <=> $a->{score} } @$results ];
@@ -51,7 +88,8 @@ sub _aggregate {
 sub _fetch {
     my $self = shift;
     my $url  = shift or croak "url required";
-    my $ua   = LWP::UserAgent->new( agent => 'apm-fedsearch' );
+    my $ua   = LWP::UserAgent->new();
+    $ua->agent('apm-fedsearch');
     $ua->timeout( $self->{timeout} ) if $self->{timeout};
 
     my $response = $ua->get($url);

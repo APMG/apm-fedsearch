@@ -7,10 +7,12 @@ use lib 'lib';
 
 use APM::FedSearch::MultiSearch;
 
+my $type = $ENV{SOS_TYPE} || 'XML';
+
 ok( my $ms = APM::FedSearch::MultiSearch->new(
         urls => [
-            'http://pkarmanpc.mpr.org:5000/search?f=0&q=test&t=XML',
-            'http://pkarmanpc.mpr.org:5000/search?f=0&q=turkey&t=XML',
+            "http://pkarmanpc.mpr.org:5000/search?f=0&q=test&t=$type",
+            "http://pkarmanpc.mpr.org:5000/search?f=0&q=turkey&t=$type",
         ],
         timeout => 5,
     ),
@@ -21,7 +23,7 @@ ok( my $resp = $ms->search(), "search()" );
 
 #dump($resp);
 
-is( ref $resp, 'ARRAY', "response is an ARRAY ref" );
+is( ref($resp), 'ARRAY', "response is an ARRAY ref" );
 
 ok( scalar(@$resp) > 1, "more than one result" );
 
