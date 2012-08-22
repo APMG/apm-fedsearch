@@ -6,11 +6,17 @@ use Data::Dump qw( dump );
 use Parallel::Iterator qw( iterate_as_array );
 use JSON;
 use LWP::UserAgent;
+use Scalar::Util qw( blessed );
 
-# we do not use WWW::OpenSearch because it does more than we need
-# but we do use XML::Feed to parse XML responses
+# TODO release to CPAN under a different name
+
+# we do not use WWW::OpenSearch because we need to pull out
+# some non-standard data from the XML.
+# we do use XML::Feed to parse XML responses.
 use XML::Simple;
 use XML::Feed;
+
+my $OS_NS = 'http://a9.com/-/spec/opensearch/1.1/';
 
 sub new {
     my $class = shift;
@@ -39,18 +45,24 @@ sub fields {
     return shift->{fields};
 }
 
+sub total {
+    return shift->{total};
+}
+
 sub _aggregate {
     my $self      = shift;
     my $responses = shift;
     my $results   = [];
     my $fields    = $self->fields;
+    my $total     = 0;
 
-    for my $resp (@$responses) {
+RESP: for my $resp (@$responses) {
 
         #warn sprintf( "response for %s\n", $resp->request->uri );
         if ( $resp->content_type eq 'application/json' ) {
             my $r = decode_json( $resp->content );
             push @$results, @{ $r->{results} };
+            $total += $r->{total};
         }
         if ( $resp->content_type eq 'application/xml' ) {
             my $xml = $resp->content;
@@ -58,20 +70,41 @@ sub _aggregate {
             #warn $xml;
             my $feed = XML::Feed->parse( \$xml );
 
+            if ( !$feed ) {
+                warn XML::Feed->errstr;
+                next RESP;
+            }
+
             #dump $feed;
             my @entries;
             for my $item ( $feed->entries ) {
                 my $e = {};
                 for my $f (@$fields) {
                     $e->{$f} = $item->$f;
+                    if ( blessed( $e->{$f} ) ) {
+
+                        #dump( $e->{$f} );
+                        if ( $e->{$f}->isa('XML::Feed::Content') ) {
+                            $e->{$f} = $e->{$f}->body;
+                        }
+                        elsif ( $e->{$f}->isa('DateTime') ) {
+                            $e->{$f} = $e->{$f}->epoch;
+                        }
+                    }
                 }
+
+                #dump $e;
                 my $content = $item->content;
-                my $fields  = XMLin( $content->body );
+                my $fields = XMLin( $content->body, NoAttr => 1 );
 
                 #dump $fields;
                 for my $f ( keys %$fields ) {
                     $e->{$f} = $fields->{$f};
                 }
+
+                # massage some field names
+                $e->{mtime} = delete $e->{modified};
+                $e->{uri}   = delete $e->{id};
 
                 #dump $content;
                 #dump $e;
@@ -79,9 +112,13 @@ sub _aggregate {
 
             }
 
+            my $atom = $feed->{atom};
+            $total += $atom->get( $OS_NS, 'totalResults' );
+
             push @$results, @entries;
         }
     }
+    $self->{total} = $total;
     return [ sort { $b->{score} <=> $a->{score} } @$results ];
 }
 

@@ -6,7 +6,9 @@ use namespace::autoclean;
 
 BEGIN { extends 'Catalyst::Model' }
 
-has urls => ( is => 'rw', isa => 'Array' );
+has urls => ( is => 'rw', isa => 'ArrayRef', required => 1, );
+has fields => ( is => 'rw', isa => 'ArrayRef' );
+has facets => ( is => 'rw', isa => 'ArrayRef' );
 
 use Carp;
 use JSON;
@@ -14,20 +16,12 @@ use Data::Dump qw( dump );
 use Search::OpenSearch::Response::JSON;
 use APM::FedSearch::MultiSearch;
 
-sub component {
-    my ( $class, $app, $args ) = @_;
-    my $self = $class->new( $app, $args );
-
-    # TODO config for remote servers
-    return $self;
-}
-
 sub about {
     my ( $self, $request ) = @_;
     my $uri   = $request->uri;
     my $about = {
         name         => 'APM Federated Search',
-        author       => 'Peter Karman <pkarman@mpr.org>',
+        author       => 'APMG',
         api_base_url => "$uri",
         api_format   => [qw( JSON ExtJS XML )],
         methods      => [
@@ -42,8 +36,8 @@ sub about {
         description =>
             'APM Federated Search provides search results across multiple domains.',
         version => $APM::FedSearch::VERSION,
-        fields  => [qw( uri title )],          # TODO
-        facets  => [qw( )],                    # TODO
+        fields  => $self->fields,
+        facets  => $self->facets,
     };
     return $about;
 }
@@ -72,6 +66,10 @@ sub search {
     return {
         results => $results,
         type    => $type,
+        total   => $ms->total(),
+        p       => $page_size,
+        o       => $offset,
+        q       => $q,
     };
 }
 

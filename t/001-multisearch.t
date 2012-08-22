@@ -1,7 +1,7 @@
 #!/usr/bin/env perl
 use strict;
 use warnings;
-use Test::More tests => 6;
+use Test::More tests => 7;
 use Data::Dump qw( dump );
 use lib 'lib';
 
@@ -43,3 +43,5 @@ R: for my $r (@$resp) {
 }
 
 ok( !$failed_sort, "results sorted by score" );
+
+ok( $ms->total(), "get total" );

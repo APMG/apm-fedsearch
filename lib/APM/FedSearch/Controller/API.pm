@@ -9,8 +9,8 @@ use JSON;
 use Data::Dump qw( dump );
 use Search::OpenSearch;
 use Search::OpenSearch::Response::JSON;
-
-#use Time::HiRes qw( time );
+use Search::OpenSearch::Response::XML;
+use Time::HiRes qw( time );
 
 has api_model => ( is => 'rw' );
 
@@ -52,8 +52,44 @@ sub index : Path : Args(0) {
 
 sub search : Local {
     my ( $self, $c ) = @_;
-    my $request  = $c->request;
-    my $res = $c->model( $self->api_model )->search( $request );
+    my $request    = $c->request;
+    my $start_time = time();
+    my $model      = $c->model( $self->api_model );
+    if ( !$model ) {
+        croak "No such model " . $self->api_model;
+    }
+    my $res = $model->search($request);
+
+    #dump $res;
+
+    # we should return the format that was requested
+    my $sos_response_class = 'Search::OpenSearch::Response::' . $res->{type};
+    my $sos_response;
+    eval {
+        $sos_response = $sos_response_class->new(
+            search_time  => sprintf( "%0.5f", time() - $start_time ),
+            build_time   => sprintf( "%0.5f", time() - $start_time ),
+            results      => $res->{results},
+            author       => 'APM Federated Search API',
+            engine       => __PACKAGE__,
+            version      => $APM::FedSearch::VERSION,
+            total        => $res->{total},
+            page_size    => $res->{p},
+            offset       => $res->{o},
+            query        => $res->{q},
+            parsed_query => $res->{q},
+            fields       => $model->fields,
+        );
+    };
+    if ($@) {
+        $c->log->error($@);
+        $c->response->body(
+            encode_json( { 'success' => 0, error => 'Server error' } ) );
+        return;
+    }
+    $c->stash( response => { content_type => $sos_response->content_type } );
+    $c->response->body("$sos_response");
+
 }
 
 =head2 default
