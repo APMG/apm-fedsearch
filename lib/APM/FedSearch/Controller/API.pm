@@ -47,7 +47,12 @@ The root page (/)
 
 sub index : Path : Args(0) {
     my ( $self, $c ) = @_;
-
+    my $model = $c->model( $self->api_model );
+    if ( !$model ) {
+        croak "No such model " . $self->api_model;
+    }
+    my $res = $model->about( $c->request );
+    $c->response->body( encode_json($res) );
 }
 
 sub search : Local {
@@ -116,9 +121,9 @@ sub end : ActionClass('RenderView') {
             || 'application/json' );
 }
 
-=head1 AUTHOR
+=head1 COPYRIGHT
 
-Catalyst developer
+Copyright 2012 - American Public Media Group
 
 =head1 LICENSE
 

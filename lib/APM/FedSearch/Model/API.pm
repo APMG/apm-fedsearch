@@ -21,7 +21,7 @@ sub about {
     my $uri   = $request->uri;
     my $about = {
         name         => 'APM Federated Search',
-        author       => 'APMG',
+        author       => 'American Public Media',
         api_base_url => "$uri",
         api_format   => [qw( JSON ExtJS XML )],
         methods      => [
@@ -74,3 +74,14 @@ sub search {
 }
 
 1;
+
+=head1 COPYRIGHT
+
+Copyright 2012 - American Public Media Group
+
+=head1 LICENSE
+
+This library is free software. You can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=cut

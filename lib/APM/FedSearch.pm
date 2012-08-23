@@ -68,6 +68,10 @@ L<APM::FedSearch::Controller::Root>, L<Catalyst>
 
 Catalyst developer
 
+=head1 COPYRIGHT
+
+Copyright 2012 - American Public Media Group
+
 =head1 LICENSE
 
 This library is free software. You can redistribute it and/or modify
