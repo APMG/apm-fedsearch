@@ -9,6 +9,14 @@ use Module::Install::Catalyst; # Complain loudly if you don't have
 name 'APM-FedSearch';
 all_from 'lib/APM/FedSearch.pm';
 
+requires 'Search::OpenSearch' => '0.20';
+requires 'Data::Transformer'  => 0;
+requires 'JSON' => '2.0';
+requires 'Parallel::Iterator' => 0;
+requires 'XML::Simple' => 0;
+requires 'XML::Feed' => 0;
+requires 'LWP::UserAgent' => 0;
+requires 'Catalyst::View::TT' => 0;
 requires 'Catalyst::Runtime' => '5.90016';
 requires 'Catalyst::Plugin::ConfigLoader';
 requires 'Catalyst::Plugin::Static::Simple';
