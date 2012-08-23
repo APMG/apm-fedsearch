@@ -1,0 +1,14 @@
+<html>
+ <head>
+  <title>APM Federated Search</title>
+ </head>
+ <body>
+  <h1>Welcome</h1>
+  <div>
+   <ul>
+    <li>Try the <a href="[% c.uri_for('/api') %]">API</a></li>
+    <li>Try the <a href="[% c.uri_for('/ui') %]">Developer UI</a></li>
+   </ul>
+  </div>
+ </body>
+</html>
