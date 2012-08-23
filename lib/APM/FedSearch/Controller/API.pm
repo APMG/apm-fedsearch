@@ -56,14 +56,31 @@ sub index : Path : Args(0) {
 }
 
 sub search : Local {
-    my ( $self, $c ) = @_;
-    my $request    = $c->request;
+    my ( $self, $c, @args ) = @_;
+    my $request = $c->request;
+    if ( @args or $request->method ne 'GET' ) {
+
+        # we do not support click-through-to-result like dezi does
+        $c->response->code(400);
+        $c->response->body(
+            encode_json( { 'success' => 0, error => 'Invalid request' } ) );
+        return;
+
+    }
+
     my $start_time = time();
     my $model      = $c->model( $self->api_model );
     if ( !$model ) {
         croak "No such model " . $self->api_model;
     }
     my $res = $model->search($request);
+
+    # check for user errors
+    if ( $res->{error} ) {
+        $c->response->body(
+            encode_json( { 'success' => 0, error => $res->{error} } ) );
+        return;
+    }
 
     #dump $res;
 

@@ -51,6 +51,10 @@ sub search {
     my $offset    = $p->{o} || 0;
     my $page_size = $p->{p} || 25;
 
+    if ( !defined $q or !length $q ) {
+        return { error => 'q param required', };
+    }
+
     # TODO sorting
 
     # TODO test paging (our math is naive)
