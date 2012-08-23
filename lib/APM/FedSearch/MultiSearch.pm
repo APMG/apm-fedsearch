@@ -7,6 +7,8 @@ use Parallel::Iterator qw( iterate_as_array );
 use JSON;
 use LWP::UserAgent;
 use Scalar::Util qw( blessed );
+use Search::Tools::XML;
+use Data::Transformer;
 
 # TODO release to CPAN under a different name
 
@@ -17,6 +19,11 @@ use XML::Simple;
 use XML::Feed;
 
 my $OS_NS = 'http://a9.com/-/spec/opensearch/1.1/';
+
+my $XMLer = Search::Tools::XML->new();
+
+my $XML_ESCAPER = Data::Transformer->new(
+    normal => sub { local ($_) = shift; $$_ = $XMLer->escape($$_); } );
 
 sub new {
     my $class = shift;
@@ -76,6 +83,11 @@ RESP: for my $resp (@$responses) {
             }
 
             #dump $feed;
+
+            #
+            # we must re-escape the XML content since the feed parser
+            # and XML::Simple will esacpe values automatically
+            #
             my @entries;
             for my $item ( $feed->entries ) {
                 my $e = {};
@@ -85,11 +97,14 @@ RESP: for my $resp (@$responses) {
 
                         #dump( $e->{$f} );
                         if ( $e->{$f}->isa('XML::Feed::Content') ) {
-                            $e->{$f} = $e->{$f}->body;
+                            $e->{$f} = $XMLer->escape( $e->{$f}->body );
                         }
                         elsif ( $e->{$f}->isa('DateTime') ) {
                             $e->{$f} = $e->{$f}->epoch;
                         }
+                    }
+                    else {
+                        $e->{$f} = $XMLer->escape( $e->{$f} );
                     }
                 }
 
@@ -98,8 +113,15 @@ RESP: for my $resp (@$responses) {
                 my $fields = XMLin( $content->body, NoAttr => 1 );
 
                 #dump $fields;
+
                 for my $f ( keys %$fields ) {
                     $e->{$f} = $fields->{$f};
+                    if ( ref $e->{$f} ) {
+                        $XML_ESCAPER->traverse( $e->{$f} );
+                    }
+                    else {
+                        $e->{$f} = $XMLer->escape( $e->{$f} );
+                    }
                 }
 
                 # massage some field names
