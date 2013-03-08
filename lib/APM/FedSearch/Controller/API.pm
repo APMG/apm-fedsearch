@@ -8,9 +8,8 @@ use Carp;
 use JSON;
 use Data::Dump qw( dump );
 use Search::OpenSearch;
-use Search::OpenSearch::Response::JSON;
-use Search::OpenSearch::Response::XML;
 use Time::HiRes qw( time );
+use Module::Load ();
 
 has api_model => ( is => 'rw' );
 
@@ -82,10 +81,15 @@ sub search : Local {
         return;
     }
 
-    #dump $res;
+    dump $res;
 
     # we should return the format that was requested
     my $sos_response_class = 'Search::OpenSearch::Response::' . $res->{type};
+    eval { Module::Load::load($sos_response_class); };
+    if ($@) {
+        $sos_response_class = 'Search::OpenSearch::Response::XML';
+        Module::Load::load($sos_response_class);
+    }
     my $sos_response;
     eval {
         $sos_response = $sos_response_class->new(

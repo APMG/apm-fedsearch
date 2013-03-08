@@ -59,11 +59,14 @@ sub search {
 
     # TODO test paging (our math is naive)
 
-    my $urls = $self->urls;
+    # make a copy of base config each time
+    my $urls = [ @{ $self->urls } ];
     for my $url (@$urls) {
         $url .= sprintf( '?q=%s&t=%s&o=%d&p=%d',
             $q, $type, $offset, int( $page_size / scalar(@$urls) ) );
     }
+
+    dump $urls;
 
     my $ms = APM::FedSearch::MultiSearch->new( urls => $urls );
     my $results = $ms->search();

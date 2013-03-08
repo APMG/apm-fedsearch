@@ -5,11 +5,11 @@ use strict;
     'Model::API'      => {
         urls => [
             'http://localhost:5000/search',
-            'http://localhost:5001/search',
+            # TODO other urls
         ],
         fields =>
             [qw( uri title description author origin tags publish_date )],
-        facets => [qw( author origin tags publish_date )],
+        facets => [qw( author origin tags )],
     },
 
 }
