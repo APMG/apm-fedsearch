@@ -66,10 +66,13 @@ sub search {
             $q, $type, $offset, int( $page_size / scalar(@$urls) ) );
     }
 
-    dump $urls;
+    #dump $urls;
 
     my $ms = APM::FedSearch::MultiSearch->new( urls => $urls );
     my $results = $ms->search();
+    
+    #dump $results;
+    
     return {
         results => $results,
         type    => $type,

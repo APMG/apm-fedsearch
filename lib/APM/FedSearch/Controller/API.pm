@@ -87,8 +87,15 @@ sub search : Local {
     my $sos_response_class = 'Search::OpenSearch::Response::' . $res->{type};
     eval { Module::Load::load($sos_response_class); };
     if ($@) {
-        $sos_response_class = 'Search::OpenSearch::Response::XML';
-        Module::Load::load($sos_response_class);
+        $c->log->error($@);
+        $c->response->body(
+            encode_json(
+                {   'success' => 0,
+                    'error'   => "Unsupported response type $res->{type}"
+                }
+            )
+        );
+        return;
     }
     my $sos_response;
     eval {
