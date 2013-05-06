@@ -121,7 +121,17 @@ sub search : Local {
         return;
     }
     $c->stash( response => { content_type => $sos_response->content_type } );
-    $c->response->body("$sos_response");
+
+    # JSONP support
+    if (    $request->params->{callback}
+        and $sos_response->content_type =~ m/json|javascript/ )
+    {
+        my $callback = $request->params->{callback};
+        $c->response->body("$callback($sos_response)");
+    }
+    else {
+        $c->response->body("$sos_response");
+    }
 
 }
 
