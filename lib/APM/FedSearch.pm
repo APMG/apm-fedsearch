@@ -42,7 +42,7 @@ __PACKAGE__->config(
     disable_component_resolution_regex_fallback => 1,
     enable_catalyst_header                      => 1, # Send X-Catalyst header
 
-    'Plugin::ConfigLoader' => { file => 'apm_fedsearch.conf.pl' }
+    'Plugin::ConfigLoader' => { file => __PACKAGE__->path_to('apm_fedsearch.conf.pl') }
 );
 
 # Start the application

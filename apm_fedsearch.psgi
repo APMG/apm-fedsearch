@@ -1,6 +1,8 @@
 use strict;
 use warnings;
-use lib 'lib';
+use FindBin;
+use lib "$FindBin::Bin/lib";
+use lib "$FindBin::Bin/../lib";
 
 use APM::FedSearch;
 
