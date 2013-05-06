@@ -47,7 +47,7 @@ sub search {
 
     my $p         = $request->parameters;
     my $q         = $p->{q};
-    my $type      = $p->{t} || $p->{format} || 'XML';
+    my $type      = $p->{t} || $p->{format} || 'JSON';
     my $offset    = $p->{o} || 0;
     my $page_size = $p->{p} || 25;
 
