@@ -81,7 +81,7 @@ sub search : Local {
         return;
     }
 
-    dump $res;
+    #dump $res;
 
     # we should return the format that was requested
     my $sos_response_class = 'Search::OpenSearch::Response::' . $res->{type};
