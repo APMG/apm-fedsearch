@@ -10,7 +10,7 @@ name 'APM-FedSearch';
 all_from 'lib/APM/FedSearch.pm';
 
 requires 'Search::OpenSearch'            => '0.20';
-requires 'Search::OpenSearch::Federated' => 0;
+requires 'Search::OpenSearch::Federated' => 0.004;
 requires 'Catalyst::View::TT'            => 0;
 requires 'Catalyst::Runtime'             => '5.90016';
 requires 'Catalyst::Plugin::ConfigLoader';

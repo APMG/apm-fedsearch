@@ -68,11 +68,14 @@ sub search {
 
     #dump $urls;
 
-    my $ms = APM::FedSearch::MultiSearch->new( urls => $urls );
+    my $ms = APM::FedSearch::MultiSearch->new(
+        urls             => $urls,
+        normalize_scores => 1,
+    );
     my $results = $ms->search();
-    
+
     #dump $results;
-    
+
     return {
         results => $results,
         type    => $type,
