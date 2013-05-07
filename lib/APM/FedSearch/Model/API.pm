@@ -50,7 +50,7 @@ sub search {
     my $q         = $p->{q};
     my $type      = $p->{t} || $p->{format} || 'JSON';
     my $offset    = $p->{o} || 0;
-    my $page_size = $p->{p} || 25;
+    my $page_size = $p->{p} || 10;
 
     if ( !defined $q or !length $q ) {
         return { error => 'q param required', };
@@ -58,13 +58,12 @@ sub search {
 
     # TODO sorting
 
-    # TODO test paging (our math is naive)
-
     # make a copy of base config each time
     my $urls = [ @{ $self->urls } ];
+
     for my $url (@$urls) {
-        $url .= sprintf( '?q=%s&t=%s&o=%d&p=%d',
-            $q, $type, $offset, int( $page_size / scalar(@$urls) ) );
+        $url .= sprintf( '?q=%s&t=%s&o=%d&p=%d', $q, $type, $offset,
+            $page_size );
     }
 
     #dump $urls;

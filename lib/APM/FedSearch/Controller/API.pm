@@ -101,7 +101,6 @@ sub search : Local {
     eval {
         $sos_response = $sos_response_class->new(
             search_time  => sprintf( "%0.5f", time() - $start_time ),
-            build_time   => sprintf( "%0.5f", time() - $start_time ),
             results      => $res->{results},
             author       => 'APM Federated Search API',
             engine       => __PACKAGE__,
