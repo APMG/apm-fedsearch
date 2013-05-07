@@ -7,8 +7,10 @@ use strict;
             'http://localhost:5000/mpr/search',
             'http://localhost:5000/tpt/search',
             'http://localhost:5000/spco/search',
+
             # TODO other urls
         ],
+        base_uri => 'http://www.mnculture.org/api/',
         fields =>
             [qw( uri title description author origin tags publish_date )],
         facets => [qw( author origin tags )],

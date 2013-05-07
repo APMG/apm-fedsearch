@@ -6,6 +6,7 @@ use namespace::autoclean;
 
 BEGIN { extends 'Catalyst::Model' }
 
+has base_uri => ( is => 'rw' );
 has urls => ( is => 'rw', isa => 'ArrayRef', required => 1, );
 has fields => ( is => 'rw', isa => 'ArrayRef' );
 has facets => ( is => 'rw', isa => 'ArrayRef' );
@@ -18,12 +19,12 @@ use APM::FedSearch::MultiSearch;
 
 sub about {
     my ( $self, $request ) = @_;
-    my $uri   = $request->uri;
+    my $uri = $self->base_uri || $request->uri;
     my $about = {
         name         => 'APM Federated Search',
         author       => 'American Public Media',
         api_base_url => "$uri",
-        api_format   => [qw( JSON ExtJS XML )],
+        api_format   => [qw( JSON ExtJS XML Tiny )],
         methods      => [
             {   method      => 'GET',
                 path        => '/search',
