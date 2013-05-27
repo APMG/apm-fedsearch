@@ -77,12 +77,14 @@ sub search {
     #dump $results;
 
     return {
-        results => $results,
-        type    => $type,
-        total   => $ms->total(),
-        p       => $page_size,
-        o       => $offset,
-        q       => $q,
+        results   => $results,
+        type      => $type,
+        facets    => $ms->facets(),
+        subtotals => $ms->subtotals(),
+        total     => $ms->total(),
+        p         => $page_size,
+        o         => $offset,
+        q         => $q,
     };
 }
 

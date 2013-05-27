@@ -102,6 +102,8 @@ sub search : Local {
         $sos_response = $sos_response_class->new(
             search_time  => sprintf( "%0.5f", time() - $start_time ),
             results      => $res->{results},
+            facets       => $res->{facets},
+            subtotals    => $res->{subtotals},
             author       => 'APM Federated Search API',
             engine       => __PACKAGE__,
             version      => $APM::FedSearch::VERSION,
