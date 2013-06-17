@@ -11,8 +11,8 @@ my $type = $ENV{SOS_TYPE} || 'XML';
 
 ok( my $ms = APM::FedSearch::MultiSearch->new(
         urls => [
-            "http://pkarmanpc.mpr.org:5000/search?f=0&q=test&t=$type",
-            "http://pkarmanpc.mpr.org:5000/search?f=0&q=turkey&t=$type",
+            "http://localhost:5000/search?f=0&q=test&t=$type",
+            "http://localhost:5000/search?f=0&q=turkey&t=$type",
         ],
         timeout => 5,
     ),

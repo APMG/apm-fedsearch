@@ -85,7 +85,12 @@ sub search : Local {
 
     # we should return the format that was requested
     my $sos_response_class = 'Search::OpenSearch::Response::' . $res->{type};
-    eval { Module::Load::load($sos_response_class); };
+    eval {
+        Module::Load::load($sos_response_class);
+        if ( !$sos_response_class->can('subtotals') ) {
+            $sos_response_class->add_attribute('subtotals');
+        }
+    };
     if ($@) {
         $c->log->error($@);
         $c->response->body(

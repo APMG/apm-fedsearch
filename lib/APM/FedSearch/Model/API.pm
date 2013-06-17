@@ -15,7 +15,7 @@ use Carp;
 use JSON;
 use Data::Dump qw( dump );
 use Search::OpenSearch::Response::JSON;
-use APM::FedSearch::MultiSearch;
+use Search::OpenSearch::Federated;
 
 sub about {
     my ( $self, $request ) = @_;
@@ -51,30 +51,28 @@ sub search {
     my $type      = $p->{t} || $p->{format} || 'JSON';
     my $offset    = $p->{o} || 0;
     my $page_size = $p->{p} || 10;
+    my $sort      = $p->{s} || 'score desc';
 
     if ( !defined $q or !length $q ) {
         return { error => 'q param required', };
     }
 
-    # TODO sorting
-
     # make a copy of base config each time
     my $urls = [ @{ $self->urls } ];
 
     for my $url (@$urls) {
-        $url .= sprintf( '?q=%s&t=%s&o=%d&p=%d', $q, $type, $offset,
-            $page_size );
+        $url .= sprintf( '?q=%s&t=%s&o=%d&p=%d&s=%s',
+            $q, $type, $offset, $page_size, $sort );
     }
 
     #dump $urls;
 
-    my $ms = APM::FedSearch::MultiSearch->new(
+    my $ms = Search::OpenSearch::Federated->new(
         urls             => $urls,
         normalize_scores => 1,
     );
-    my $results = $ms->search();
 
-    #dump $results;
+    my $results = $ms->search();
 
     return {
         results   => $results,
@@ -85,6 +83,7 @@ sub search {
         p         => $page_size,
         o         => $offset,
         q         => $q,
+        s         => $sort,
     };
 }
 
