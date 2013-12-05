@@ -80,7 +80,7 @@ sub search {
         facets    => $ms->facets(),
         subtotals => $ms->subtotals(),
         total     => $ms->total(),
-        p         => $page_size,
+        p         => ( $page_size * scalar(@$urls) ),
         o         => $offset,
         q         => $q,
         s         => $sort,
