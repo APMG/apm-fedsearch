@@ -12,7 +12,7 @@ use strict;
         ],
         base_uri => 'http://www.mnculture.org/api/',
         fields =>
-            [qw( uri title description author origin tags publish_date guid )],
+            [qw( uri title description author origin tags publish_date guid lastmod )],
         facets => [qw( author origin tags )],
     },
 
